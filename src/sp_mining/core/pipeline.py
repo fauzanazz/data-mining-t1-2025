@@ -1,8 +1,8 @@
-"""Pipeline orchestrator for FP Mining.
+"""Pipeline orchestrator for SP Mining.
 
 This module provides the concrete pipeline implementation that
 coordinates the execution of multiple datasets, algorithms, and
-evaluators in a systematic manner.
+evaluators for sequential pattern mining.
 """
 
 from dataclasses import dataclass, field
@@ -12,14 +12,15 @@ import logging
 import pandas as pd
 from tqdm import tqdm
 
-from fp_mining.core.interfaces import (
-    Algorithm,
-    AlgorithmResult,
-    DataLoader,
-    DataTransformer,
-    Evaluator,
-    EvaluationResult,
-    Pipeline,
+from sp_mining.core.interfaces import (
+    SPAlgorithm,
+    SPAlgorithmResult,
+    SequenceLoader,
+    SequenceTransformer,
+    SPEvaluator,
+    SPEvaluationResult,
+    SPPipeline,
+    Sequence,
 )
 
 
@@ -27,11 +28,11 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class DatasetConfig:
-    """Configuration for a dataset in the pipeline."""
+class SPDatasetConfig:
+    """Configuration for a dataset in the SP pipeline."""
 
-    loader: DataLoader
-    transformer: DataTransformer
+    loader: SequenceLoader
+    transformer: SequenceTransformer
     name: str = ""
 
     def __post_init__(self) -> None:
@@ -40,8 +41,8 @@ class DatasetConfig:
 
 
 @dataclass
-class PipelineResult:
-    """Complete result of a pipeline execution."""
+class SPPipelineResult:
+    """Complete result of an SP pipeline execution."""
 
     results: dict[str, dict[str, dict[str, Any]]]
     summary: dict[str, Any] = field(default_factory=dict)
@@ -50,7 +51,7 @@ class PipelineResult:
         self,
         dataset: str,
         algorithm: str,
-    ) -> AlgorithmResult | None:
+    ) -> SPAlgorithmResult | None:
         """Get algorithm result for a specific dataset and algorithm."""
         try:
             return self.results[dataset][algorithm]["result"]
@@ -61,7 +62,7 @@ class PipelineResult:
         self,
         dataset: str,
         algorithm: str,
-    ) -> dict[str, EvaluationResult]:
+    ) -> dict[str, SPEvaluationResult]:
         """Get all evaluation results for a dataset/algorithm combination."""
         try:
             return self.results[dataset][algorithm].get("evaluations", {})
@@ -69,17 +70,17 @@ class PipelineResult:
             return {}
 
 
-class FPMiningPipeline(Pipeline):
-    """Concrete pipeline for Frequent Pattern mining.
+class SPMiningPipeline(SPPipeline):
+    """Concrete pipeline for Sequential Pattern mining.
 
     This pipeline allows running multiple algorithms on multiple
     datasets, evaluating results with multiple metrics.
 
     Example:
-        >>> pipeline = FPMiningPipeline()
-        >>> pipeline.add_dataset(csv_loader, transaction_transformer)
-        >>> pipeline.add_algorithm(apriori)
-        >>> pipeline.add_algorithm(fpgrowth)
+        >>> pipeline = SPMiningPipeline()
+        >>> pipeline.add_dataset(csv_loader, temporal_transformer)
+        >>> pipeline.add_algorithm(prefixspan)
+        >>> pipeline.add_algorithm(gsp)
         >>> pipeline.add_evaluator(coverage_evaluator)
         >>> results = pipeline.run()
     """
@@ -90,29 +91,29 @@ class FPMiningPipeline(Pipeline):
         Args:
             verbose: If True, show progress bars during execution.
         """
-        self._datasets: list[DatasetConfig] = []
-        self._algorithms: list[Algorithm] = []
-        self._evaluators: list[Evaluator] = []
-        self._cached_transactions: dict[str, list[list[str]]] = {}
+        self._datasets: list[SPDatasetConfig] = []
+        self._algorithms: list[SPAlgorithm] = []
+        self._evaluators: list[SPEvaluator] = []
+        self._cached_sequences: dict[str, list[Sequence]] = {}
         self._verbose = verbose
 
     def add_dataset(
         self,
-        loader: DataLoader,
-        transformer: DataTransformer,
+        loader: SequenceLoader,
+        transformer: SequenceTransformer,
         name: str | None = None,
-    ) -> "FPMiningPipeline":
+    ) -> "SPMiningPipeline":
         """Add a dataset with its transformer to the pipeline.
 
         Args:
-            loader: DataLoader implementation.
-            transformer: DataTransformer implementation.
+            loader: SequenceLoader implementation.
+            transformer: SequenceTransformer implementation.
             name: Optional custom name for the dataset.
 
         Returns:
             Self for method chaining.
         """
-        config = DatasetConfig(
+        config = SPDatasetConfig(
             loader=loader,
             transformer=transformer,
             name=name or loader.name,
@@ -121,11 +122,11 @@ class FPMiningPipeline(Pipeline):
         logger.info(f"Added dataset: {config.name}")
         return self
 
-    def add_algorithm(self, algorithm: Algorithm) -> "FPMiningPipeline":
+    def add_algorithm(self, algorithm: SPAlgorithm) -> "SPMiningPipeline":
         """Add an algorithm to the pipeline.
 
         Args:
-            algorithm: Algorithm implementation.
+            algorithm: SPAlgorithm implementation.
 
         Returns:
             Self for method chaining.
@@ -134,11 +135,11 @@ class FPMiningPipeline(Pipeline):
         logger.info(f"Added algorithm: {algorithm.name}")
         return self
 
-    def add_evaluator(self, evaluator: Evaluator) -> "FPMiningPipeline":
+    def add_evaluator(self, evaluator: SPEvaluator) -> "SPMiningPipeline":
         """Add an evaluator to the pipeline.
 
         Args:
-            evaluator: Evaluator implementation.
+            evaluator: SPEvaluator implementation.
 
         Returns:
             Self for method chaining.
@@ -147,7 +148,7 @@ class FPMiningPipeline(Pipeline):
         logger.info(f"Added evaluator: {evaluator.name}")
         return self
 
-    def set_verbose(self, verbose: bool) -> "FPMiningPipeline":
+    def set_verbose(self, verbose: bool) -> "SPMiningPipeline":
         """Set verbose mode for progress bars.
 
         Args:
@@ -161,13 +162,13 @@ class FPMiningPipeline(Pipeline):
 
     def _load_and_transform(
         self,
-        config: DatasetConfig,
+        config: SPDatasetConfig,
         pbar: tqdm | None = None,
-    ) -> list[list[str]]:
+    ) -> list[Sequence]:
         """Load and transform a dataset, with caching."""
-        if config.name in self._cached_transactions:
-            logger.debug(f"Using cached transactions for {config.name}")
-            return self._cached_transactions[config.name]
+        if config.name in self._cached_sequences:
+            logger.debug(f"Using cached sequences for {config.name}")
+            return self._cached_sequences[config.name]
 
         if pbar:
             pbar.set_description(f"Loading {config.name}")
@@ -180,19 +181,19 @@ class FPMiningPipeline(Pipeline):
             pbar.set_description(f"Transforming {config.name}")
 
         logger.info(f"Transforming with {config.transformer.name}")
-        transactions = config.transformer.transform(df)
-        logger.info(f"Created {len(transactions)} transactions")
+        sequences = config.transformer.transform(df)
+        logger.info(f"Created {len(sequences)} sequences")
 
-        self._cached_transactions[config.name] = transactions
-        return transactions
+        self._cached_sequences[config.name] = sequences
+        return sequences
 
     def _run_algorithm(
         self,
-        algorithm: Algorithm,
-        transactions: list[list[str]],
+        algorithm: SPAlgorithm,
+        sequences: list[Sequence],
         pbar: tqdm | None = None,
-    ) -> AlgorithmResult:
-        """Run a single algorithm on transactions."""
+    ) -> SPAlgorithmResult:
+        """Run a single algorithm on sequences."""
         if pbar:
             pbar.set_description(f"Running {algorithm.name}")
 
@@ -200,32 +201,32 @@ class FPMiningPipeline(Pipeline):
             f"Running {algorithm.name} with min_support={algorithm.min_support}, "
             f"min_confidence={algorithm.min_confidence}"
         )
-        result = algorithm.run(transactions)
+        result = algorithm.run(sequences)
         logger.info(
-            f"{algorithm.name} found {len(result.itemsets)} itemsets, "
+            f"{algorithm.name} found {len(result.patterns)} patterns, "
             f"{len(result.rules)} rules in {result.execution_time:.4f}s"
         )
         return result
 
     def _evaluate_result(
         self,
-        evaluator: Evaluator,
-        result: AlgorithmResult,
-        transactions: list[list[str]],
+        evaluator: SPEvaluator,
+        result: SPAlgorithmResult,
+        sequences: list[Sequence],
         pbar: tqdm | None = None,
-    ) -> EvaluationResult:
+    ) -> SPEvaluationResult:
         """Evaluate algorithm result with a single evaluator."""
         if pbar:
             pbar.set_description(f"Evaluating with {evaluator.name}")
 
         logger.debug(f"Evaluating with {evaluator.name}")
-        return evaluator.evaluate(result, transactions)
+        return evaluator.evaluate(result, sequences)
 
-    def run(self) -> PipelineResult:
+    def run(self) -> SPPipelineResult:
         """Execute the complete pipeline.
 
         Returns:
-            PipelineResult containing all results organized by
+            SPPipelineResult containing all results organized by
             dataset, algorithm, and evaluator.
         """
         if not self._datasets:
@@ -234,7 +235,7 @@ class FPMiningPipeline(Pipeline):
             raise ValueError("No algorithms added to pipeline")
 
         results: dict[str, dict[str, dict[str, Any]]] = {}
-        total_itemsets = 0
+        total_patterns = 0
         total_rules = 0
         total_time = 0.0
 
@@ -245,7 +246,7 @@ class FPMiningPipeline(Pipeline):
 
         with tqdm(
             total=total_steps,
-            desc="FP Mining Pipeline",
+            desc="SP Mining Pipeline",
             disable=not self._verbose,
             unit="step",
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]",
@@ -255,14 +256,14 @@ class FPMiningPipeline(Pipeline):
                 results[dataset_name] = {}
 
                 # Load and transform
-                transactions = self._load_and_transform(dataset_config, pbar)
+                sequences = self._load_and_transform(dataset_config, pbar)
                 pbar.update(1)
 
                 for algorithm in self._algorithms:
                     algo_name = algorithm.name
 
                     # Run algorithm
-                    algo_result = self._run_algorithm(algorithm, transactions, pbar)
+                    algo_result = self._run_algorithm(algorithm, sequences, pbar)
                     pbar.update(1)
 
                     results[dataset_name][algo_name] = {
@@ -270,14 +271,14 @@ class FPMiningPipeline(Pipeline):
                         "evaluations": {},
                     }
 
-                    total_itemsets += len(algo_result.itemsets)
+                    total_patterns += len(algo_result.patterns)
                     total_rules += len(algo_result.rules)
                     total_time += algo_result.execution_time
 
                     # Run evaluators
                     for evaluator in self._evaluators:
                         eval_result = self._evaluate_result(
-                            evaluator, algo_result, transactions, pbar
+                            evaluator, algo_result, sequences, pbar
                         )
                         results[dataset_name][algo_name]["evaluations"][
                             evaluator.name
@@ -290,18 +291,18 @@ class FPMiningPipeline(Pipeline):
             "num_datasets": len(self._datasets),
             "num_algorithms": len(self._algorithms),
             "num_evaluators": len(self._evaluators),
-            "total_itemsets_found": total_itemsets,
+            "total_patterns_found": total_patterns,
             "total_rules_generated": total_rules,
             "total_execution_time": total_time,
         }
 
-        logger.info(f"Pipeline complete: {summary}")
-        return PipelineResult(results=results, summary=summary)
+        logger.info(f"SP Pipeline complete: {summary}")
+        return SPPipelineResult(results=results, summary=summary)
 
-    def clear(self) -> "FPMiningPipeline":
+    def clear(self) -> "SPMiningPipeline":
         """Clear all datasets, algorithms, and evaluators."""
         self._datasets.clear()
         self._algorithms.clear()
         self._evaluators.clear()
-        self._cached_transactions.clear()
+        self._cached_sequences.clear()
         return self

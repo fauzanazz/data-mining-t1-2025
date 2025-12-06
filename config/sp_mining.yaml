@@ -1,0 +1,98 @@
+# Sequential Pattern Mining Pipeline Configuration
+# ================================================
+
+# Pipeline settings
+pipeline:
+  name: "SP Mining Pipeline"
+  verbose: true
+
+# Dataset configurations
+datasets:
+  - name: "Retail-Sequences"
+    loader:
+      type: "csv"
+      path: "datasets/Retail_Transaction_Dataset.csv"
+      options:
+        parse_dates:
+          - "TransactionDate"
+    transformer:
+      type: "temporal"
+      options:
+        sequence_col: "CustomerID"
+        item_col: "ProductCategory"
+        time_col: "TransactionDate"
+
+  # Event sequence example
+  # - name: "User-Sessions"
+  #   loader:
+  #     type: "csv"
+  #     path: "datasets/user_events.csv"
+  #   transformer:
+  #     type: "event"
+  #     options:
+  #       sequence_col: "SessionID"
+  #       event_col: "EventType"
+  #       time_col: "Timestamp"
+
+  # Session-based example
+  # - name: "Clickstream"
+  #   loader:
+  #     type: "csv"
+  #     path: "datasets/clickstream.csv"
+  #   transformer:
+  #     type: "session"
+  #     options:
+  #       user_col: "UserID"
+  #       item_col: "PageURL"
+  #       time_col: "Timestamp"
+  #       session_gap_minutes: 30
+
+# Algorithm configurations
+algorithms:
+  - name: "prefixspan"
+    type: "prefixspan"
+    params:
+      min_support: 0.01
+      min_confidence: 0.5
+      max_pattern_length: 5
+      verbose: true
+
+  - name: "gsp"
+    type: "gsp"
+    params:
+      min_support: 0.01
+      min_confidence: 0.5
+      max_pattern_length: 5
+      verbose: true
+
+# Evaluator configurations
+evaluators:
+  - name: "coverage"
+    type: "coverage"
+
+  - name: "quality"
+    type: "quality"
+    params:
+      high_confidence_threshold: 0.8
+      high_lift_threshold: 2.0
+
+  - name: "performance"
+    type: "performance"
+
+# Output configuration
+output:
+  # Save results to file
+  save_results: true
+  output_dir: "output/sp_mining"
+
+  # Output formats
+  formats:
+    - "json"
+    # - "csv"
+
+  # Print summary to console
+  print_summary: true
+
+  # Number of top patterns/rules to display
+  top_patterns: 10
+  top_rules: 10

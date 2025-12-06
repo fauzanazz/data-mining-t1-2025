@@ -1,0 +1,27 @@
+# Default Configuration
+# =====================
+# Base configuration that can be overridden by specific configs
+
+# Common pipeline settings
+pipeline:
+  verbose: true
+
+# Default algorithm parameters
+algorithm_defaults:
+  min_support: 0.01
+  min_confidence: 0.5
+
+# Default evaluator settings
+evaluator_defaults:
+  high_confidence_threshold: 0.8
+  high_lift_threshold: 2.0
+
+# Default output settings
+output:
+  save_results: false
+  output_dir: "output"
+  formats:
+    - "json"
+  print_summary: true
+  top_rules: 5
+  top_patterns: 5
