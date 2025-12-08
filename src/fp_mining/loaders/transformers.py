@@ -1,6 +1,6 @@
 """Data transformers for converting DataFrames to transaction format."""
 
-from typing import Callable
+from typing import Callable, Optional
 
 import pandas as pd
 
@@ -76,8 +76,8 @@ class BasketTransformer:
 
     def __init__(
         self,
-        item_columns: list[str] | None = None,
-        item_string_col: str | None = None,
+        item_columns: Optional[list[str]] = None,
+        item_string_col: Optional[str] = None,
         delimiter: str = ",",
         name: str = "BasketTransformer",
     ) -> None:

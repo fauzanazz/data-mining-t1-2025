@@ -9,7 +9,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from common.config import (
     ConfigLoader,
@@ -69,7 +69,7 @@ class SPConfigRunner:
         "performance": SPPerformanceEvaluator,
     }
 
-    def __init__(self, default_config_path: str | Path | None = None) -> None:
+    def __init__(self, default_config_path: Optional[Path] = None) -> None:
         """Initialize the config runner.
 
         Args:
@@ -323,8 +323,8 @@ class SPConfigRunner:
 
     def run(
         self,
-        config_path: str | Path,
-        overrides: dict[str, Any] | None = None,
+        config_path: Path,
+        overrides: Optional[dict[str, Any]] = None,
     ) -> SPPipelineResult:
         """Run pipeline from configuration file.
 

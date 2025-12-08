@@ -8,6 +8,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import Optional
 
 from fp_mining.core.container import Container
 from fp_mining.core.pipeline import FPMiningPipeline
@@ -103,7 +104,7 @@ def create_default_container(
     return container
 
 
-def run_pipeline(container: Container, algorithms: list[str] | None = None) -> None:
+def run_pipeline(container: Container, algorithms: Optional[list[str]] = None) -> None:
     """Run the FP mining pipeline with registered components.
 
     Args:

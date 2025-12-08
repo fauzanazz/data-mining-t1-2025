@@ -6,7 +6,7 @@ evaluators for sequential pattern mining.
 """
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 import logging
 
 import pandas as pd
@@ -51,7 +51,7 @@ class SPPipelineResult:
         self,
         dataset: str,
         algorithm: str,
-    ) -> SPAlgorithmResult | None:
+    ) -> Optional[SPAlgorithmResult]:
         """Get algorithm result for a specific dataset and algorithm."""
         try:
             return self.results[dataset][algorithm]["result"]
@@ -101,7 +101,7 @@ class SPMiningPipeline(SPPipeline):
         self,
         loader: SequenceLoader,
         transformer: SequenceTransformer,
-        name: str | None = None,
+        name: Optional[str] = None,
     ) -> "SPMiningPipeline":
         """Add a dataset with its transformer to the pipeline.
 
@@ -163,7 +163,7 @@ class SPMiningPipeline(SPPipeline):
     def _load_and_transform(
         self,
         config: SPDatasetConfig,
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> list[Sequence]:
         """Load and transform a dataset, with caching."""
         if config.name in self._cached_sequences:
@@ -191,7 +191,7 @@ class SPMiningPipeline(SPPipeline):
         self,
         algorithm: SPAlgorithm,
         sequences: list[Sequence],
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> SPAlgorithmResult:
         """Run a single algorithm on sequences."""
         if pbar:
@@ -213,7 +213,7 @@ class SPMiningPipeline(SPPipeline):
         evaluator: SPEvaluator,
         result: SPAlgorithmResult,
         sequences: list[Sequence],
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> SPEvaluationResult:
         """Evaluate algorithm result with a single evaluator."""
         if pbar:

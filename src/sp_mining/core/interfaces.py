@@ -14,7 +14,7 @@ it considers the ORDER of items/events, making it suitable for:
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Optional, Protocol, runtime_checkable
 
 import pandas as pd
 
@@ -181,7 +181,7 @@ class SPAlgorithm(ABC):
         self,
         min_support: float = 0.01,
         min_confidence: float = 0.5,
-        max_pattern_length: int | None = None,
+        max_pattern_length: Optional[int] = None,
     ) -> None:
         """Initialize algorithm with minimum thresholds.
 
@@ -205,7 +205,7 @@ class SPAlgorithm(ABC):
         return self._min_confidence
 
     @property
-    def max_pattern_length(self) -> int | None:
+    def max_pattern_length(self) -> Optional[int]:
         """Get maximum pattern length."""
         return self._max_pattern_length
 

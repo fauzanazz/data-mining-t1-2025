@@ -6,7 +6,7 @@ for both FP and SP mining pipelines.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 import yaml
 
@@ -104,7 +104,7 @@ class ConfigLoader:
         "FP Mining Pipeline"
     """
 
-    def __init__(self, default_config_path: str | Path | None = None) -> None:
+    def __init__(self, default_config_path: Optional[Union[str, Path]] = None) -> None:
         """Initialize config loader.
 
         Args:
@@ -206,7 +206,7 @@ class ConfigLoader:
             top_patterns=data.get("top_patterns", 5),
         )
 
-    def load(self, config_path: str | Path) -> PipelineConfig:
+    def load(self, config_path: Union[str, Path]) -> PipelineConfig:
         """Load and parse a configuration file.
 
         Args:
@@ -261,8 +261,8 @@ class ConfigLoader:
 
     def load_with_overrides(
         self,
-        config_path: str | Path,
-        overrides: dict[str, Any] | None = None,
+        config_path: Union[str, Path],
+        overrides: Optional[dict[str, Any]] = None,
     ) -> PipelineConfig:
         """Load configuration with command-line overrides.
 

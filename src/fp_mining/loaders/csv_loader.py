@@ -1,7 +1,7 @@
 """CSV data loader implementation."""
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 import pandas as pd
 
@@ -19,8 +19,8 @@ class CSVLoader:
 
     def __init__(
         self,
-        file_path: str | Path,
-        name: str | None = None,
+        file_path: Union[str, Path],
+        name: Optional[str] = None,
         **pandas_kwargs: Any,
     ) -> None:
         """Initialize CSV loader.

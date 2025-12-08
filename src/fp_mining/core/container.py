@@ -5,7 +5,7 @@ the registration and resolution of components like algorithms,
 data loaders, transformers, and evaluators.
 """
 
-from typing import Any, Callable, TypeVar, Generic
+from typing import Any, Callable, Optional, TypeVar, Generic
 
 from fp_mining.core.interfaces import (
     Algorithm,
@@ -28,7 +28,7 @@ class ServiceDescriptor(Generic[T]):
     ) -> None:
         self.factory = factory
         self.singleton = singleton
-        self._instance: T | None = None
+        self._instance: Optional[T] = None
 
     def resolve(self, container: "Container") -> T:
         """Resolve the service instance."""
@@ -225,7 +225,7 @@ class Container:
 
 
 # Global container instance (optional usage)
-_default_container: Container | None = None
+_default_container: Optional["Container"] = None
 
 
 def get_container() -> Container:

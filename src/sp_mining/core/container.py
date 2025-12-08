@@ -4,7 +4,7 @@ This module provides a DI container that manages the registration
 and resolution of SP mining components.
 """
 
-from typing import Any, Callable, TypeVar, Generic
+from typing import Any, Callable, Optional, TypeVar, Generic
 
 from sp_mining.core.interfaces import (
     SPAlgorithm,
@@ -27,7 +27,7 @@ class ServiceDescriptor(Generic[T]):
     ) -> None:
         self.factory = factory
         self.singleton = singleton
-        self._instance: T | None = None
+        self._instance: Optional[T] = None
 
     def resolve(self, container: "SPContainer") -> T:
         """Resolve the service instance."""
@@ -190,7 +190,7 @@ class SPContainer:
 
 
 # Global container instance (optional usage)
-_default_container: SPContainer | None = None
+_default_container: Optional["SPContainer"] = None
 
 
 def get_sp_container() -> SPContainer:

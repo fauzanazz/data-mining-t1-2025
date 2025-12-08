@@ -1,5 +1,7 @@
 """FP-Growth algorithm implementation."""
 
+from typing import Optional
+
 import pandas as pd
 from mlxtend.frequent_patterns import fpgrowth, association_rules
 from mlxtend.preprocessing import TransactionEncoder
@@ -28,7 +30,7 @@ class FPGrowthAlgorithm(Algorithm):
         self,
         min_support: float = 0.01,
         min_confidence: float = 0.5,
-        max_len: int | None = None,
+        max_len: Optional[int] = None,
         use_colnames: bool = True,
     ) -> None:
         """Initialize FP-Growth algorithm.
@@ -43,7 +45,7 @@ class FPGrowthAlgorithm(Algorithm):
         self._max_len = max_len
         self._use_colnames = use_colnames
         self._te = TransactionEncoder()
-        self._itemsets_df: pd.DataFrame | None = None
+        self._itemsets_df: Optional[pd.DataFrame] = None
 
     @property
     def name(self) -> str:

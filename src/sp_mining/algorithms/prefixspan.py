@@ -5,7 +5,7 @@ algorithm that uses prefix projection to reduce the search space.
 """
 
 from collections import defaultdict
-from typing import Any
+from typing import Any, Optional
 
 from tqdm import tqdm
 
@@ -36,7 +36,7 @@ class PrefixSpanAlgorithm(SPAlgorithm):
         self,
         min_support: float = 0.01,
         min_confidence: float = 0.5,
-        max_pattern_length: int | None = None,
+        max_pattern_length: Optional[int] = None,
         verbose: bool = True,
     ) -> None:
         """Initialize PrefixSpan algorithm.
@@ -51,7 +51,7 @@ class PrefixSpanAlgorithm(SPAlgorithm):
         self._patterns: list[SequentialPattern] = []
         self._num_sequences: int = 0
         self._verbose = verbose
-        self._pbar: tqdm | None = None
+        self._pbar: Optional[tqdm] = None
 
     @property
     def name(self) -> str:

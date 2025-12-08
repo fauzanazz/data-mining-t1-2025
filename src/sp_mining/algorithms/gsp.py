@@ -6,6 +6,7 @@ uses a level-wise candidate generation approach.
 
 from collections import defaultdict
 from itertools import combinations
+from typing import Optional
 
 from tqdm import tqdm
 
@@ -37,7 +38,7 @@ class GSPAlgorithm(SPAlgorithm):
         self,
         min_support: float = 0.01,
         min_confidence: float = 0.5,
-        max_pattern_length: int | None = None,
+        max_pattern_length: Optional[int] = None,
         verbose: bool = True,
     ) -> None:
         """Initialize GSP algorithm.
@@ -92,7 +93,7 @@ class GSPAlgorithm(SPAlgorithm):
         self,
         candidates: list[tuple[Itemset, ...]],
         sequences: list[Sequence],
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> dict[tuple[Itemset, ...], int]:
         """Count support for candidate patterns.
 

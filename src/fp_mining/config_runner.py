@@ -9,7 +9,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from common.config import (
     ConfigLoader,
@@ -68,7 +68,7 @@ class FPConfigRunner:
         "performance": PerformanceEvaluator,
     }
 
-    def __init__(self, default_config_path: str | Path | None = None) -> None:
+    def __init__(self, default_config_path: Optional[Path] = None) -> None:
         """Initialize the config runner.
 
         Args:
@@ -87,10 +87,11 @@ class FPConfigRunner:
             )
 
         loader_class = self.LOADER_TYPES[loader_type]
+        options = config.loader.options or {}
         return loader_class(
             config.loader.path,
             name=config.name,
-            **config.loader.options,
+            **options,
         )
 
     def _create_transformer(self, config: ConfigDatasetConfig) -> Any:
@@ -292,8 +293,8 @@ class FPConfigRunner:
 
     def run(
         self,
-        config_path: str | Path,
-        overrides: dict[str, Any] | None = None,
+        config_path: Path,
+        overrides: Optional[dict[str, Any]] = None,
     ) -> PipelineResult:
         """Run pipeline from configuration file.
 

@@ -6,7 +6,7 @@ evaluators in a systematic manner.
 """
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 import logging
 
 import pandas as pd
@@ -50,7 +50,7 @@ class PipelineResult:
         self,
         dataset: str,
         algorithm: str,
-    ) -> AlgorithmResult | None:
+    ) -> Optional[AlgorithmResult]:
         """Get algorithm result for a specific dataset and algorithm."""
         try:
             return self.results[dataset][algorithm]["result"]
@@ -100,7 +100,7 @@ class FPMiningPipeline(Pipeline):
         self,
         loader: DataLoader,
         transformer: DataTransformer,
-        name: str | None = None,
+        name: Optional[str] = None,
     ) -> "FPMiningPipeline":
         """Add a dataset with its transformer to the pipeline.
 
@@ -162,7 +162,7 @@ class FPMiningPipeline(Pipeline):
     def _load_and_transform(
         self,
         config: DatasetConfig,
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> list[list[str]]:
         """Load and transform a dataset, with caching."""
         if config.name in self._cached_transactions:
@@ -190,7 +190,7 @@ class FPMiningPipeline(Pipeline):
         self,
         algorithm: Algorithm,
         transactions: list[list[str]],
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> AlgorithmResult:
         """Run a single algorithm on transactions."""
         if pbar:
@@ -212,7 +212,7 @@ class FPMiningPipeline(Pipeline):
         evaluator: Evaluator,
         result: AlgorithmResult,
         transactions: list[list[str]],
-        pbar: tqdm | None = None,
+        pbar: Optional[tqdm] = None,
     ) -> EvaluationResult:
         """Evaluate algorithm result with a single evaluator."""
         if pbar:

@@ -22,6 +22,19 @@ datasets:
         group_col: "CustomerID"
         item_col: "ProductCategory"
 
+  - name: "Assignment-1-Invoices"
+    loader:
+      type: "csv"
+      path: "datasets/Assignment-1_Data.csv"
+      options:
+        sep: ";"          # dataset uses semicolon delimiter
+        decimal: ","      # decimal numbers use comma
+    transformer:
+      type: "retail"
+      options:
+        group_col: "BillNo"
+        item_col: "Itemname"
+
   # Add more datasets as needed
   # - name: "Retail-Products"
   #   loader:

@@ -8,6 +8,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import Optional
 
 from sp_mining.core.container import SPContainer
 from sp_mining.core.pipeline import SPMiningPipeline
@@ -34,7 +35,7 @@ def create_default_container(
     data_path: str,
     min_support: float = 0.01,
     min_confidence: float = 0.5,
-    max_pattern_length: int | None = None,
+    max_pattern_length: Optional[int] = None,
 ) -> SPContainer:
     """Create a container with default registrations.
 
@@ -114,7 +115,7 @@ def create_default_container(
 
 def run_pipeline(
     container: SPContainer,
-    algorithms: list[str] | None = None,
+    algorithms: Optional[list[str]] = None,
 ) -> None:
     """Run the SP mining pipeline with registered components.
 

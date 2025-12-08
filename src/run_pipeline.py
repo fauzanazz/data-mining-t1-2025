@@ -14,7 +14,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -62,8 +62,8 @@ def detect_pipeline_type(config_path: Path) -> str:
 
 def run_fp_pipeline(
     config_path: Path,
-    default_config: str | None,
-    overrides: dict[str, Any],
+    default_config: Optional[str],
+    overrides: Optional[Dict[str, Any]],
 ) -> int:
     """Run FP mining pipeline."""
     from fp_mining.config_runner import FPConfigRunner
@@ -79,8 +79,8 @@ def run_fp_pipeline(
 
 def run_sp_pipeline(
     config_path: Path,
-    default_config: str | None,
-    overrides: dict[str, Any],
+    default_config: Optional[str],
+    overrides: Optional[Dict[str, Any]],
 ) -> int:
     """Run SP mining pipeline."""
     from sp_mining.config_runner import SPConfigRunner
